@@ -1,5 +1,4 @@
-import Queue as Q
-
+import queue as Q
 """
 To consider: how to avoid expanding subproblems we've already seen before
 
@@ -17,7 +16,7 @@ def search(constraints, total_wizards):
     visited.add(str(initial))
     while not S.empty():
         current = S.get()
-        print(str(current[1]) + '\n')
+        # print(str(current[1]) + '\n')
         new_subproblems = expand(current)
         for p in new_subproblems:
             # if the test succeeds, return the list in this subproblem as the solution
@@ -191,5 +190,6 @@ def const_satisfied(ordering, c):
         return False
 
 
-if __name__ == '__main__':
-    main(sys.argv[1:])
+# I don't know what this does but it doesn't seem important
+# if __name__ == '__main__':
+#     main(sys.argv[1:])
