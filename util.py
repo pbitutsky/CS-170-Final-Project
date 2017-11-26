@@ -36,8 +36,8 @@ def constraint_satisfaction(ordering, constraints):
         if ordering[c[2]] > ordering[c[1]] or ordering[c[2]] < ordering[c[0]]:
             total_passed += 1
         else:
-            constraint_violations[c[0]] += 1;
-            constraint_violations[c[1]] += 1;
+            constraint_violations[c[0]] += 1
+            constraint_violations[c[1]] += 1
             constraint_violations[c[2]] += 1
     return total_passed, constraint_violations, max(constraint_violations, key=lambda x: constraint_violations[x])
 
