@@ -1,4 +1,5 @@
 import traceback
+from search import *
 
 from Solver import *
 
@@ -15,8 +16,18 @@ def read_file_and_solve(file_name):
     for i in range(C):
         wizard1, wizard2, wizard3 = str(file.readline()).strip().split(" ")
         constraints.append([wizard1, wizard2, wizard3])
-
     print(solve(sorted(wizards), constraints))
+
+def read_file_and_search(file_name):
+    file = open(file_name, "r")
+    W = int(file.readline())
+    wizards = str(file.readline()).strip().split(" ")
+    C = int(file.readline())
+    constraints = list()
+    for i in range(C):
+        wizard1, wizard2, wizard3 = str(file.readline()).strip().split(" ")
+        constraints.append([wizard1, wizard2, wizard3])
+    print(search(constraints, len(wizards)))
 
 def make_test_simple(correct_list, constraints):
     # if type(correct_list) == list:
@@ -28,7 +39,7 @@ def make_test_simple(correct_list, constraints):
 
     def test_simple():
         try:
-            test_result = solve(correct_list, constraints)
+            test_result = search(constraints,len(correct_list))
             total_passed = constraint_satisfaction(test_result, constraints)[0]
             if total_passed == len(constraints): #passed all constraints
                 return True, ""
@@ -40,15 +51,39 @@ def make_test_simple(correct_list, constraints):
 
     return test_simple
 
+def make_test_simple_search(correct_list, constraints):
+    # if type(correct_list) == list:
+    #     correct_ordering = lst_to_ordering(correct_list)
+    # elif type(correct_list) == dict:
+    #     correct_ordering = correct_list
+    # else:
+    #     raise Exception("You need to pass in either a list or a dict")
+
+    def test_simple():
+        try:
+            test_result = search(constraints,len(correct_list))
+            # total_passed = constraint_satisfaction(test_result, constraints)[0]
+            # if total_passed == len(constraints): #passed all constraints
+            if test_result is not None:
+                return True, ""
+            else:
+                # return False, "Solve returned an ordering that does not satisfy all constraints."
+                return False, ""
+        except Exception as e:
+            print(traceback.print_exc())
+            return False, "Exception Raised!"
+
+    return test_simple
+
 
 tests = {
 
-    "Simple 8 letters": make_test_simple(['d', 'b', 'g', 'h', 'f', 'e', 'c', 'a'],
+    "Simple 8 letters": make_test_simple_search(['d', 'b', 'g', 'h', 'f', 'e', 'c', 'a'],
                                       [['c', 'b', 'a'], ['e', 'c', 'b'], ['a', 'c', 'h'], ['a', 'e', 'g'],
                                        ['f', 'd', 'e'], ['c', 'f', 'd'], ['g', 'c', 'd'], ['b', 'f', 'd'],
                                        ['b', 'a', 'd'], ['b', 'f', 'c'], ['g', 'e', 'd'], ['a', 'f', 'g'],
                                        ['f', 'b', 'd'], ['e', 'a', 'f'], ['c', 'e', 'b']]),
-    "Game of Thrones": make_test_simple(["Sansa", "Rickon", "Jon", "Rob", "Bran", "Arya"],
+    "Game of Thrones": make_test_simple_search(["Sansa", "Rickon", "Jon", "Rob", "Bran", "Arya"],
                                         [["Jon", "Sansa", "Rob"], ["Jon", "Arya", "Rob"],
                                          ["Jon", "Bran", "Rob"], ["Sansa", "Rickon", "Jon"],
                                          ["Arya", "Rickon", "Jon"], ["Bran", "Rickon", "Jon"],
@@ -70,4 +105,7 @@ for key in tests:
 
 print("")
 print(passed, "tests passed.")
+
+read_file_and_search("input20.in")
+read_file_and_search("input35.in")
 
