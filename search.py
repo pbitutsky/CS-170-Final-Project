@@ -5,9 +5,15 @@ To consider: how to avoid expanding subproblems we've already seen before
 Less slicing, more bitstrings
 """
 
+DEBUG_PRINT = False
+
+def debug_print(*args):
+    if DEBUG_PRINT:
+        print(" ".join([str(x) for x in list(args)]))
 
 def search(constraints, total_wizards):
     # initial subproblem: tuple of the list of unsatisfied constraints and the ordering so far
+    counter = 1
     initial = (constraints, [])
     # S: set of active subproblems
     S = Q.PriorityQueue()
@@ -16,24 +22,43 @@ def search(constraints, total_wizards):
     visited.add(str(initial))
     while not S.empty():
         current = S.get()
-        # print(str(current[1]) + '\n')
+        debug_print(str(current[1]))
         new_subproblems = expand(current)
+        debug_print("New problems: ")
         for p in new_subproblems:
-            # if the test succeeds, return the list in this subproblem as the solution
-            if test(p, total_wizards) == 1:
-                return p[1]
-            # if test doesn't fail, add subproblem to PQ
-            elif test(p, total_wizards) != -1 and str(p) not in visited:
-                visited.add(str(p))
-                S.put(p, len(p[0]))
+            debug_print(len(p[0]))
+            # debug_print(p[0])
+            debug_print(p[1])
+
+        for p in new_subproblems:
+            if str(p) not in visited:
+                # if the test succeeds, return the list in this subproblem as the solution
+                if len(p[1]) == total_wizards:#test(p, total_wizards) == 1:
+                    return p[1]
+                # if test doesn't fail, add subproblem to PQ
+                # elif test(p, total_wizards) != -1:
+                #     print("Why wouldn't this happen?")
+                if test(p, constraints, total_wizards) != -1:
+                    debug_print("putting into queue: ", p[1])
+                    S.put(p, len(p[0]))
+                        # visited.add(str(p))
+        debug_print("current", current)
+        debug_print("Queue:", S.qsize())
+        debug_print("")
+        visited.add(str(current))
+        counter += 1
+        if (counter % 100 == 0):
+            print(counter)
+
             # if the test fails, don't add the subproblem to the PQ
     # didn't find a solution
     return None
 
 
 # test if a subproblem satisfies all constraints and if all wizards in ordering
-def test(subprob, total_wizards):
-    constraints = subprob[0]
+def test(subprob, constraints, total_wizards):
+    debug_print("TESTING", subprob[1], total_wizards)
+    # constraints = subprob[0]
     ordering = subprob[1]
     num_wizards = len(ordering)
     num_constraints_satisfied = 0
@@ -43,10 +68,11 @@ def test(subprob, total_wizards):
             wiz2_index = ordering.index(c[1])
             wiz3_index = ordering.index(c[2])
             if wiz1_index < wiz3_index < wiz2_index or wiz1_index > wiz3_index > wiz2_index:
+                debug_print("SOME CONSTRAINT VIOLATED", c)
                 return -1
             else:
                 num_constraints_satisfied += 1
-    if num_wizards == total_wizards:
+    if num_constraints_satisfied == len(constraints): #!!!!!!
         return 1
     else:
         return 0
@@ -68,7 +94,8 @@ def expand(subprob):
     # all 3 wizards already in ordering, but they're violating the constraint. this case might never happen?!
     new_subproblems = []
     if c[0] in ordering and c[1] in ordering and c[2] in ordering:
-        print("this case shouldn't happen")
+        # @Katya no this can happen -- it just means there are duplicate constraints
+        pass #raise Exception("this case shouldn't happen")
     # 2 out of 3 wizards in ordering
     # first two in ordering
     elif c[0] in ordering and c[1] in ordering:
@@ -78,6 +105,7 @@ def expand(subprob):
         new_subproblems = generate_placements_wiz3(new_constraints, ordering, wizA_index, wizB_index, c[2])
     # one of the first two in ordering, and the third one in ordering
     elif (c[1] in ordering and c[2] in ordering) or (c[0] in ordering and c[2] in ordering):
+        debug_print("CASE 2")
         if c[1] in ordering:
             wizB = c[0]
             wizA_index = ordering.index(c[1])
@@ -85,20 +113,27 @@ def expand(subprob):
             wizB = c[1]
             wizA_index = ordering.index(c[0])
         wiz3_index = ordering.index(c[2])
+        debug_print("Wiz_A_index:", wizA_index, "Wiz B:", wizB)
         new_subproblems = generate_placements_wizB(new_constraints, ordering, wizA_index, wizB, wiz3_index)
-    # only wiz3 in odering
+    # only wiz3 in ordering
     elif c[2] in ordering:
-        wiz3_index = ordering.index(c[2])
+        debug_print("CASE 3")
+        #wiz3_index = ordering.index(c[2]) #THIS IS THE GREAT BUG OF 2017
         wizA = c[0]
         wizB = c[1]
         new_subproblems = []
         i = 0
+        debug_print(ordering, wizA, wizB)
         while i <= len(ordering):
             new_order = ordering[:]
             new_order.insert(i, wizA)
+            wiz3_index = new_order.index(c[2])
+            debug_print("New Order", new_order)
             more_subproblems = generate_placements_wizB(new_constraints, new_order, i, wizB, wiz3_index)
+            debug_print("More Subproblems: ", [x[1] for x in more_subproblems])
             new_subproblems.extend(more_subproblems)
             i += 1
+        debug_print(len(new_subproblems))
     # only one of the first two wizards in ordering
     elif c[0] in ordering or c[1] in ordering:
         if c[0] in ordering:
@@ -159,13 +194,14 @@ def generate_placements_wiz3(constraints, ordering, wizA_index, wizB_index, wiz3
 
 # returns a list of new subproblems
 def generate_placements_wizB(constraints, ordering, wizA_index, wizB, wiz3_index):
+    debug_print("A:", wizA_index, "C:", wiz3_index)
     new_subproblems = []
     new_wizard = wizB
     # print("finding wizB placement")
     if wiz3_index > wizA_index:
         # wizB can go anywhere before wiz3
         i = 0
-        while i < wiz3_index:
+        while i <= wiz3_index: # THE SECOND GREAT BUG OF 2017 <= not <
             new_order = ordering[:]
             new_order.insert(i, new_wizard)
             new_subproblems.append((constraints, new_order))
@@ -181,7 +217,7 @@ def generate_placements_wizB(constraints, ordering, wizA_index, wizB, wiz3_index
     return new_subproblems
 
 
-# do these three wizards exisit in the current ordering and is the constraint satisfied
+# do these three wizards exist in the current ordering and is the constraint satisfied
 def const_satisfied(ordering, c):
     if c[0] in ordering and c[1] in ordering and c[2] in ordering:
         return (ordering.index(c[2]) < ordering.index(c[1]) and ordering.index(c[2]) < ordering.index(c[0])) \

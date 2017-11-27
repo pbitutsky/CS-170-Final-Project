@@ -61,3 +61,21 @@ def random_list(n):
     lst = [''.join(random.choices(string.ascii_uppercase + string.digits, k=10)) for i in range(n)]
     random.shuffle(lst)
     return lst
+
+#validate that a file's correct ordering passes all constraints
+def validate(file_name):
+    file = open(file_name, "r")
+    W = int(file.readline())
+    wizards = str(file.readline()).strip().split(" ")
+    C = int(file.readline())
+    constraints = list()
+    for i in range(C):
+        wizard1, wizard2, wizard3 = str(file.readline()).strip().split(" ")
+        constraints.append([wizard1, wizard2, wizard3])
+    for constraint in constraints:
+        w1, w2, w3 = [wizards.index(constraint[i]) for i in range(0, 3)]
+        if w3 in range(w1, w2) or w3 in range(w2, w1):
+            return False
+        else:
+            print("Constraint Passed")
+    return True
