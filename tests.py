@@ -3,6 +3,7 @@ from search import *
 from random import *
 import string
 import random
+from util import *
 
 import sys
 if sys.version_info[0] < 3:
@@ -18,7 +19,10 @@ def read_file_and_search(file_name):
         for i in range(C):
             wizard1, wizard2, wizard3 = str(file.readline()).strip().split(" ")
             constraints.append([wizard1, wizard2, wizard3])
-        return search(constraints, len(wizards))
+
+        sorted_constraints = convert_and_sort_constraints(constraints, W)
+
+        return search(sorted_constraints, len(wizards))
     return test
 
 def random_test(num_wizards):

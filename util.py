@@ -79,3 +79,32 @@ def validate(file_name):
         else:
             print("Constraint Passed")
     return True
+
+def convert_and_sort_constraints(constraints, num_wizards):
+    wizard_number_map = {} # map wizard -> number
+    wizard_constraint_histogram = {} # map wizard -> how many constraint reference them
+    constraints = constraints[:]
+    for constraint in constraints:
+        for wizard in constraint: # 1, 2, 3
+            if wizard not in wizard_constraint_histogram:
+                wizard_constraint_histogram[wizard] = 1
+            else:
+                wizard_constraint_histogram[wizard] += 1
+    wizards_by_desc_frequency = sorted(wizard_constraint_histogram,
+                                       key=lambda w: wizard_constraint_histogram[w], reverse=True)
+    counter = 0
+    for wizard in wizards_by_desc_frequency:
+        wizard_number_map[wizard] = counter
+        print(counter, ":", wizard, wizard_constraint_histogram[wizard])
+        counter += 1
+
+
+
+    return sorted(constraints, key=lambda c: sum([2**wizard_number_map[w] for w in c]))
+
+    # For debugging:
+    # for c in new_constraints:
+    #     total = sum([2 ** wizard_number_map[w] for w in c])
+    #     print(c, '{:#010b}'.format(total), total)
+
+
