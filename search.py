@@ -3,6 +3,10 @@ import queue as Q
 To consider: how to avoid expanding subproblems we've already seen before
 
 Less slicing, more bitstrings
+pycosat!!!!!!!!!!!!!
+local search
+pruning constraints for SAT
+random is best WHAT 
 """
 
 DEBUG_PRINT = False

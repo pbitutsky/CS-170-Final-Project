@@ -4,6 +4,7 @@ from random import *
 import string
 import random
 from util import *
+import randomAlt
 
 import sys
 if sys.version_info[0] < 3:
@@ -20,9 +21,13 @@ def read_file_and_search(file_name):
             wizard1, wizard2, wizard3 = str(file.readline()).strip().split(" ")
             constraints.append([wizard1, wizard2, wizard3])
 
-        sorted_constraints = convert_and_sort_constraints(constraints, W)
+        # sorted_constraints = convert_and_sort_constraints(constraints, W)
 
-        return search(sorted_constraints, len(wizards))
+        # return search(sorted_constraints, len(wizards))
+        print(wizards)
+        random.shuffle(wizards)
+        print(wizards)
+        return randomAlt.random_check(constraints, lst_to_ordering(wizards))
     return test
 
 def random_test(num_wizards):
@@ -60,14 +65,14 @@ def random_test(num_wizards):
     return test
 
 tests = {
-    # "Input20": read_file_and_search("input20.in"),
+    "Input20": read_file_and_search("input20.in"),
     # "Input35": read_file_and_search("input35.in")
     #  "Random16": random_test(16)
     # "Input10": read_file_and_search("input10.in")
          }
 
-for i in range(0, 100):
-    tests["Random"+str(i)] = random_test(30)
+# for i in range(0, 100):
+#     tests["Random"+str(i)] = random_test(30)
 
 counter = 0
 passed = 0
