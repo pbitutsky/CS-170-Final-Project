@@ -71,7 +71,7 @@ def random_test(num_wizards):
 tests = {
     # "Input20": read_file_and_search("input20.in"),
     # "Input35": read_file_and_search("input35.in")
-     "Random20": random_test(35)
+     "Random50": random_test(50)
     # "Input10": read_file_and_search("input10.in")
          }
 
