@@ -33,9 +33,9 @@ def random_test(num_wizards):
 
     def test():
         # generate a list of n random names of length 10, and constraints
-        # lst = [''.join(random.choices(string.ascii_uppercase + string.digits, k=10)) for i in range(num_wizards)]
-        lst = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-        # lst = ['a', 'b', 'c', 'd', 'e']
+        lst = [''.join(random.choices(string.ascii_uppercase + string.digits, k=10)) for i in range(num_wizards)]
+        # lst = ['b', 'a', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+        # lst = ['b', 'a', 'c']
         # C = random.randint(1, 10)
         C = 500
         constraints = list()
@@ -60,6 +60,7 @@ def random_test(num_wizards):
         f.write(str(len(constraints)) + '\n')
         for constraint in constraints:
             f.write(' '.join(constraint) + "\n")
+        print(constraints)
         result_ordering = Reducer.solve(constraints, num_wizards)
         print(result_ordering)
         # print(constraint_satisfaction(lst_to_ordering(result_ordering), constraints)[0])
@@ -70,7 +71,7 @@ def random_test(num_wizards):
 tests = {
     # "Input20": read_file_and_search("input20.in"),
     # "Input35": read_file_and_search("input35.in")
-     "Random20": random_test(10)
+     "Random20": random_test(35)
     # "Input10": read_file_and_search("input10.in")
          }
 

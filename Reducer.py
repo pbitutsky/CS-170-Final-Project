@@ -2,10 +2,17 @@ import util
 import pycosat
 
 # TODO Make Reducer into an object
+# TODO prune pycosat input or keep a set
 all_wizards = set()
 all_positions = []  # make this a set!
 all_variables = set()
+cnf_set = set()
 cnf = []
+
+def add_to_cnf(clause):
+    if str(clause) not in cnf_set:
+        cnf_set.add(str(clause))
+        cnf.append(clause)
 
 class Wizard:
     def __init__(self, name):
@@ -53,7 +60,7 @@ def reduce(constraints, wizards):
     n = len(wizards)
     for i in range(1, n**2+1):
         wizard_name = wizards[(i-1)%n]
-        print(wizard_name)
+        # print(wizard_name)
 
         # create a new Wizard
         wiz = Wizard(wizard_name)
@@ -101,7 +108,7 @@ def initialization():
                 english = "If " + str(vars[i]) + " then not " + str(vars[j]) + "."
                 clause = [-vars[i].number, -vars[j].number]
                 # print(english, clause)
-                cnf.append(clause)
+                add_to_cnf(clause)
     # print("\n")
     for wiz in all_wizards:
         vars = wiz.variables
@@ -110,7 +117,7 @@ def initialization():
                 english = "If " + str(vars[i]) + " then not " + str(vars[j]) + "."
                 clause = [-vars[i].number, -vars[j].number]
                 # print(english, clause)
-                cnf.append(clause)
+                add_to_cnf(clause)
 
     for pos in all_positions:
         vars = pos.variables
@@ -120,7 +127,7 @@ def initialization():
             english.append(str(v))
             clause.append(v.number)
         # print(" and ".join(english), clause)
-        cnf.append(clause)
+        add_to_cnf(clause)
 
     for wiz in all_wizards:
         vars = wiz.variables
@@ -130,7 +137,7 @@ def initialization():
             english.append(str(v))
             clause.append(v.number)
         # print(" and ".join(english), clause)
-        cnf.append(clause)
+        add_to_cnf(clause)
 
 #given a string wizard, returns the object
 def find_wizard(wizard_name):
@@ -162,18 +169,22 @@ def constraints_to_cnf(constraints):
                               and w3_pos.number not in range(w2_pos.number, w1_pos.number)
                     # print(i, j, k, w1_pos, w2_pos, w3_pos, allowed)
                     if not allowed:
-                        cnf.append([-w1_pos.number, -w2_pos.number, -w3_pos.number])
+                        add_to_cnf([-i.number, -j.number, -k.number])
 
 
 def solve(constraints, num_wizards):
     wizards = sorted(util.get_wizards_from_constraints(constraints))
-    print(wizards)
+    # print(wizards)
     assert len(wizards) == num_wizards
     # constraints = prune(constraints)
+    print("Reducing")
     cnf = reduce(constraints, wizards)
     # for clause in cnf:
-        # print(clause)
+    #     print(clause)
+    print("Clauses: ", len(cnf))
+    print("Evaluating")
     pycosat_result = pycosat.solve(cnf)
+    # print(pycosat_result)
 
     result = ["" for x in range(len(wizards))]
     for var_num in pycosat_result:
