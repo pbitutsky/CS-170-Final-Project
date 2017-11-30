@@ -2,7 +2,7 @@ import util
 import pycosat
 
 # TODO Make Reducer into an object
-# TODO prune pycosat input or keep a set
+# TODO Prune constraints
 all_wizards = set()
 all_positions = []  # make this a set!
 all_variables = set()

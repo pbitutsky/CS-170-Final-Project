@@ -8,8 +8,8 @@ from util import *
 import randomAlt
 
 import sys
-if sys.version_info[0] < 3:
-    raise "Must be using Python 3"
+# if sys.version_info[0] < 3:
+#     raise "Must be using Python 3"
 
 def read_file_and_search(file_name):
     def test():
@@ -33,7 +33,23 @@ def random_test(num_wizards):
 
     def test():
         # generate a list of n random names of length 10, and constraints
-        lst = [''.join(random.choices(string.ascii_uppercase + string.digits, k=10)) for i in range(num_wizards)]
+
+        #disgusting code added for python 2
+        choices = set()
+        i = 0
+        while i < num_wizards:
+            name = ""
+            for j in range(10):
+                character = random.choice(string.ascii_uppercase + string.digits)
+                name += character
+
+            print(name)
+            if name not in choices:
+                choices.add(name)
+                i += 1
+
+        lst = list(choices)
+
         # lst = ['b', 'a', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
         # lst = ['b', 'a', 'c']
         # C = random.randint(1, 10)
@@ -71,7 +87,7 @@ def random_test(num_wizards):
 tests = {
     # "Input20": read_file_and_search("input20.in"),
     # "Input35": read_file_and_search("input35.in")
-     "Random50": random_test(50)
+     "Random20": random_test(35)
     # "Input10": read_file_and_search("input10.in")
          }
 
