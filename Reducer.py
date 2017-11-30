@@ -1,6 +1,7 @@
 import util
 import pycosat
 
+# TODO Make Reducer into an object
 all_wizards = set()
 all_positions = []  # make this a set!
 all_variables = set()
