@@ -108,3 +108,10 @@ def convert_and_sort_constraints(constraints, num_wizards):
     #     print(c, '{:#010b}'.format(total), total)
 
 
+def get_wizards_from_constraints(constraints):
+    wizards = set()
+    for constraint in constraints:
+        for wizard in constraint:
+            if wizard not in wizards:
+                wizards.add(wizard)
+    return list(wizards)

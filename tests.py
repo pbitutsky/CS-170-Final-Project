@@ -1,8 +1,9 @@
 import traceback
-from search import *
+# from search import *
 from random import *
 import string
 import random
+import Reducer
 from util import *
 import randomAlt
 
@@ -24,10 +25,7 @@ def read_file_and_search(file_name):
         # sorted_constraints = convert_and_sort_constraints(constraints, W)
 
         # return search(sorted_constraints, len(wizards))
-        print(wizards)
-        random.shuffle(wizards)
-        print(wizards)
-        return randomAlt.random_check(constraints, lst_to_ordering(wizards))
+
     return test
 
 def random_test(num_wizards):
@@ -35,8 +33,9 @@ def random_test(num_wizards):
 
     def test():
         # generate a list of n random names of length 10, and constraints
-        lst = [''.join(random.choices(string.ascii_uppercase + string.digits, k=10)) for i in range(num_wizards)]
-        # lst = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+        # lst = [''.join(random.choices(string.ascii_uppercase + string.digits, k=10)) for i in range(num_wizards)]
+        lst = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+        # lst = ['a', 'b', 'c', 'd', 'e']
         # C = random.randint(1, 10)
         C = 500
         constraints = list()
@@ -61,13 +60,17 @@ def random_test(num_wizards):
         f.write(str(len(constraints)) + '\n')
         for constraint in constraints:
             f.write(' '.join(constraint) + "\n")
-        return search(constraints, num_wizards)
+        result_ordering = Reducer.solve(constraints, num_wizards)
+        print(result_ordering)
+        # print(constraint_satisfaction(lst_to_ordering(result_ordering), constraints)[0])
+        return constraint_satisfaction(lst_to_ordering(result_ordering), constraints)[0] == len(constraints)
+
     return test
 
 tests = {
-    "Input20": read_file_and_search("input20.in"),
+    # "Input20": read_file_and_search("input20.in"),
     # "Input35": read_file_and_search("input35.in")
-    #  "Random16": random_test(16)
+     "Random20": random_test(10)
     # "Input10": read_file_and_search("input10.in")
          }
 

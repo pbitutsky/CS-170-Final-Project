@@ -30,6 +30,7 @@ for row in range(0, n):
             cnf_input.append(cnf2)
             print(english, "    ", cnf, "    ", cnf2)
 
+#O(n^2)
 for col in range(0, n):
     cnf_input.append([(n*row+col+1) for row in range(0, n)])
 
@@ -52,6 +53,10 @@ tmp_list = [
     ['b1', 'a4', 'c3'],
     ['b2', 'a4', 'c3']
 ]
+
+# returns a list of cnf clauses
+def expand_constraint():
+    pass
 
 def find(letter):
     for row in range(0, n):
