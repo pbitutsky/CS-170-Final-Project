@@ -12,7 +12,6 @@ def get_sorted_wizard_tuple(wiz_tuple):
     return (wiz_tuple[0], wiz_tuple[1])
 
 
-# PAUL
 def generate_variables_and_constraint_clauses(wizards, constraints):
     counter = 1
     for constraint in constraints:
@@ -41,7 +40,6 @@ def generate_variables_and_constraint_clauses(wizards, constraints):
         clauses = [[-a, b], [a, -b]]
         SAT_clauses.extend(clauses)
 
-# KATYA
 def generate_transitivity_clauses(wizards):
     for a in wizards:
         for b in wizards:
@@ -63,7 +61,7 @@ def find_ordering(wizards, variables):
             graph[wiz1].add(wiz2)
         else:
             graph[wiz2].add(wiz1)
-    toposort_flatten(graph)
+    return toposort_flatten(graph)
 
 # input is the SAT clauses, output is true_variables
 def solve_SAT():
@@ -77,10 +75,7 @@ def sanity_check(SAT_result):
         else:
             print("Wizard " + wiz_tuple[1] + " should be before " + wiz_tuple[0])
 
-
-
 def solve(wizards, constraints):
-
     generate_variables_and_constraint_clauses(wizards, constraints)
     generate_transitivity_clauses(wizards)
     true_variables = solve_SAT(SAT_clauses)
