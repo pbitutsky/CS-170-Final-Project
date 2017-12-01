@@ -22,7 +22,6 @@ def generate_variables_and_constraint_clauses(wizards, constraints):
 
         #generate the variables
         for wiz_tuple in [wizard_tuple1, wizard_tuple2]:
-
             #create a sorted wiz tuple
             sorted_wiz_tuple = get_sorted_wizard_tuple(wiz_tuple)
             if sorted_wiz_tuple not in wizards_to_variable:
@@ -77,6 +76,7 @@ def sanity_check(SAT_result):
 def solve(wizards, constraints):
     generate_variables_and_constraint_clauses(wizards, constraints)
     generate_transitivity_clauses(wizards)
+    print(len(SAT_clauses))
     pycosat_result = solve_SAT()
     return find_ordering(wizards, pycosat_result)
 
