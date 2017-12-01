@@ -1,4 +1,5 @@
 import argparse
+from toposort import toposort, toposort_flatten
 import pycosat
 
 variable_to_wizards = {}
@@ -52,29 +53,17 @@ def generate_transitivity_clauses(wizards):
                     SAT_clauses.append([-var1, -var2, var3])
                     SAT_clauses.append([var1, var2, -var3])
 
-class GraphNode:
-    def __init__(self, wizard, children=[]):
-        self.wizard = wizard
-        # list of all nodes to which this node has a directed edge
-        self.children = children
-
-    def add_neighbor(node):
-        children.append(node)
-
-class Graph:
-    def __init__(self, wizards):
-        # map from wizard name to GraphNode object
-        self.nodes = {}
-        for w in wizards:
-            self.nodes[w] = GraphNode(w)
-
-
-def generate_var_relationship_graph(wizards, true_variables):
-    graph = Graph(wizards)
-    for var in true_variables:
+def find_ordering(wizards, variables):
+    graph = {}
+    for w in wizards:
+        graph[w] = {}
+    for var in variables:
         wiz1, wiz2 = variable_to_wizards[var]
-        graph.nodes[wiz1].add_neighbor(wiz2)
-
+        if var > 0:
+            graph[wiz1].add(wiz2)
+        else:
+            graph[wiz2].add(wiz1)
+    toposort_flatten(graph)
 
 # input is the SAT clauses, output is true_variables
 def solve_SAT():
@@ -89,9 +78,6 @@ def sanity_check(SAT_result):
             print("Wizard " + wiz_tuple[1] + " should be before " + wiz_tuple[0])
 
 
-# run topological sort on graph, returns wizard ordering 
-def find_ordering(graph):
-    pass
 
 def solve(wizards, constraints):
 
