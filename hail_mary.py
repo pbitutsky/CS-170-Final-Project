@@ -1,6 +1,7 @@
 
 import argparse
 
+# map from variable number to a tuple of (w_1, w_2), where w_1 < w_2
 variable_map = {}
 SAT_clauses = []
 
@@ -14,13 +15,40 @@ def generate_constraint_clauses(constraints):
 
 # KATYA
 def generate_transitivity_clauses(wizards):
-    pass
+    for a in wizards:
+        for b in wizards:
+            for c in wizards:
+                var1 = wizards_to_variable[(a, b)]
+                var2 = wizards_to_variable[(b, c)]
+                var3 = wizards_to_variable[(a, c)]
+                SAT_clauses.add([-var1, -var2, var3])
+                SAT_clauses.add([var1, var2, -var3])
 
-# class GraphNode:
+
+class GraphNode:
+    def __init__(self, wizard, children=[]):
+        self.wizard = wizard
+        # list of all nodes to which this node has a directed edge
+        self.children = children
+
+    def add_neighbor(node):
+        children.append(node)
+
+class Graph:
+    def __init__(self, wizards):
+        # map from wizard name to GraphNode object
+        self.nodes = {}
+        for w in wizards:
+            self.nodes[w] = GraphNode(w)
 
 
-def generate_var_relationship_graph(true_variables):
-    pass
+def generate_var_relationship_graph(wizards, true_variables):
+    graph = Graph(wizards)
+    for var in true_variables:
+        wiz1, wiz2 = variable_to_wizards[var]
+        graph.nodes[wiz1].add_neighbor(wiz2)
+
+
 
 # input is the SAT clauses, output is true_variables
 def solve_SAT():
