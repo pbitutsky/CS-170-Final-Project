@@ -1,3 +1,4 @@
+
 import util
 import pycosat
 
@@ -7,12 +8,45 @@ all_wizards = set()
 all_positions = []  # make this a set!
 all_variables = set()
 cnf_set = set()
+cnf_map = {}
 cnf = []
 
+#if two int arrays are permutations of each other
+def is_permutation(lst1, lst2):
+    if len(lst1) != len(lst2):
+        return False
+    mul = lambda x, y: x * y
+    if reduce(mul, [x for x in lst1]) != reduce(mul, [x for x in lst2]):
+        return False
+    histogram = {}
+    for item in lst1:
+        if item not in histogram:
+            histogram[item] = 1
+        else:
+            histogram[item] += 1
+    for item in lst2:
+        if item not in histogram:
+            return False
+        else:
+            histogram[item] -= 1
+    return sum(histogram.values()) == 0
+
 def add_to_cnf(clause):
-    if str(clause) not in cnf_set:
-        cnf_set.add(str(clause))
-        cnf.append(clause)
+    mul = lambda x, y: x * y
+    multiplied = reduce(mul, clause)
+    if multiplied not in cnf_map:
+        cnf_map[multiplied] = [clause]
+    else:
+        for x in cnf_map[multiplied]:
+            if is_permutation(x, clause):
+                return
+        cnf_map[multiplied].append(clause)
+
+    cnf.append(clause)
+
+    # if str(clause) not in cnf_set:
+        # cnf_set.add(str(clause))
+        # cnf.append(clause)
 
 class Wizard:
     def __init__(self, name):
@@ -51,7 +85,7 @@ class Variable:
 
 
 #Given a list of constraints, and set of wizards, reduce the problem to an expression in CNF
-def reduce(constraints, wizards):
+def reduce_to_SAT(constraints, wizards):
     # variables = [i for i in range(1, len(wizards)**2+1)] #there are n^2 variables
     # english_variables = [wizards[(i-1)%n] + str(((i-1)//n)+1) for i in range(1, len(wizards)**2+1)]
     # print(variables)
@@ -184,7 +218,7 @@ def solve(constraints, num_wizards):
     assert len(wizards) == num_wizards
     # constraints = prune(constraints)
     print("Reducing")
-    cnf = reduce(constraints, wizards)
+    cnf = reduce_to_SAT(constraints, wizards)
     # for clause in cnf:
     #     print(clause)
     print("Clauses: ", len(cnf))

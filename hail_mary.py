@@ -33,7 +33,6 @@ def generate_variables_and_constraint_clauses(wizards, constraints):
                 else:
                     raise Exception("This shouldn't happen")
 
-        print(variable_to_wizards)
         a = wizards_to_variable[get_sorted_wizard_tuple(wizard_tuple1)]
         b = wizards_to_variable[get_sorted_wizard_tuple(wizard_tuple2)]
 
@@ -51,12 +50,12 @@ def generate_transitivity_clauses(wizards):
                     SAT_clauses.append([-var1, -var2, var3])
                     SAT_clauses.append([var1, var2, -var3])
 
-def find_ordering(wizards, variables):
+def find_ordering(wizards, SAT_result):
     graph = {}
     for w in wizards:
-        graph[w] = {}
-    for var in variables:
-        wiz1, wiz2 = variable_to_wizards[var]
+        graph[w] = set()
+    for var in SAT_result:
+        wiz1, wiz2 = variable_to_wizards[abs(var)]
         if var > 0:
             graph[wiz1].add(wiz2)
         else:
@@ -78,10 +77,8 @@ def sanity_check(SAT_result):
 def solve(wizards, constraints):
     generate_variables_and_constraint_clauses(wizards, constraints)
     generate_transitivity_clauses(wizards)
-    true_variables = solve_SAT(SAT_clauses)
-    graph = generate_var_relationship_graph(true_variables)
-    result = find_ordering(graph)
-    return result
+    pycosat_result = solve_SAT()
+    return find_ordering(wizards, pycosat_result)
 
 def read_input(filename):
     with open(filename) as f:
@@ -103,14 +100,18 @@ if __name__=="__main__":
     parser.add_argument("input_file", type=str, help = "___.in")
     args = parser.parse_args()
     num_wizards, num_constraints, wizards, constraints = read_input(args.input_file)
+    solution = solve(wizards, constraints)
+    print(solution)
 
-    # TEST HERE
-    print(wizards)
-
-
-# generate_variables_and_constraint_clauses(['a', 'b', 'c', 'd'], [['a', 'b', 'c'], ['a', 'c', 'd'], ['b', 'c', 'a']])
+# wizards = ['a', 'b', 'c', 'd']
+# generate_variables_and_constraint_clauses(wizards, [['a', 'b', 'c'], ['a', 'c', 'd'], ['b', 'c', 'a']])
 # generate_transitivity_clauses(['a', 'b', 'c', 'd'])
 # print(variable_to_wizards)
 # print(wizards_to_variable)
 # print(SAT_clauses)
-# sanity_check(solve_SAT())
+# result = solve_SAT()
+# sanity_check(result)
+# print(find_ordering(wizards, result))
+
+
+
