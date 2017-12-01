@@ -1,5 +1,6 @@
 import argparse
 from toposort import toposort, toposort_flatten
+import pycosat
 
 variable_to_wizards = {}
 wizards_to_variable = {}
@@ -45,11 +46,12 @@ def generate_transitivity_clauses(wizards):
     for a in wizards:
         for b in wizards:
             for c in wizards:
-                var1 = wizards_to_variable[(a, b)]
-                var2 = wizards_to_variable[(b, c)]
-                var3 = wizards_to_variable[(a, c)]
-                SAT_clauses.add([-var1, -var2, var3])
-                SAT_clauses.add([var1, var2, -var3])
+                if (a, b) in wizards_to_variable and (b, c) in wizards_to_variable and (a, c) in wizards_to_variable:
+                    var1 = wizards_to_variable[(a, b)]
+                    var2 = wizards_to_variable[(b, c)]
+                    var3 = wizards_to_variable[(a, c)]
+                    SAT_clauses.append([-var1, -var2, var3])
+                    SAT_clauses.append([var1, var2, -var3])
 
 def find_ordering(wizards, variables):
     graph = {}
@@ -65,15 +67,22 @@ def find_ordering(wizards, variables):
 
 # input is the SAT clauses, output is true_variables
 def solve_SAT():
-    pass
+    return pycosat.solve(SAT_clauses)
+
+def sanity_check(SAT_result):
+    for var in SAT_result:
+        wiz_tuple = variable_to_wizards[abs(var)]
+        if var > 0:
+            print("Wizard " + wiz_tuple[0] + " should be before " + wiz_tuple[1])
+        else:
+            print("Wizard " + wiz_tuple[1] + " should be before " + wiz_tuple[0])
+
 
 
 def solve(wizards, constraints):
 
     generate_variables_and_constraint_clauses(wizards, constraints)
     generate_transitivity_clauses(wizards)
-
-
     true_variables = solve_SAT(SAT_clauses)
     graph = generate_var_relationship_graph(true_variables)
     result = find_ordering(graph)
@@ -105,6 +114,8 @@ if __name__=="__main__":
 
 
 # generate_variables_and_constraint_clauses(['a', 'b', 'c', 'd'], [['a', 'b', 'c'], ['a', 'c', 'd'], ['b', 'c', 'a']])
+# generate_transitivity_clauses(['a', 'b', 'c', 'd'])
 # print(variable_to_wizards)
 # print(wizards_to_variable)
 # print(SAT_clauses)
+# sanity_check(solve_SAT())
