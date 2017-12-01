@@ -11,4 +11,4 @@ def generate_output_files(num_wizards):
 		# except:
 		# 	print("error")
 		
-generate_output_files(35)
+generate_output_files(50)
