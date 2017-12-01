@@ -49,7 +49,6 @@ def processInput(input_file, output_file):
             constraints_failed.append(c)
         else:
             constraints_satisfied += 1
-
     return constraints_satisfied, num_constraints, constraints_failed
 
 if __name__ == '__main__':

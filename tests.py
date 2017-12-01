@@ -78,7 +78,10 @@ def random_test(num_wizards):
             f.write(' '.join(constraint) + "\n")
         print(constraints)
         result_ordering = Reducer.solve(constraints, num_wizards)
+        f = open('output_random' + str(num_wizards) + '.out', 'w')
+        f.write(" ".join(result_ordering))
         print(result_ordering)
+
         # print(constraint_satisfaction(lst_to_ordering(result_ordering), constraints)[0])
         return constraint_satisfaction(lst_to_ordering(result_ordering), constraints)[0] == len(constraints)
 
@@ -87,7 +90,7 @@ def random_test(num_wizards):
 tests = {
     # "Input20": read_file_and_search("input20.in"),
     # "Input35": read_file_and_search("input35.in")
-     "Random20": random_test(35)
+     "Random20": random_test(20)
     # "Input10": read_file_and_search("input10.in")
          }
 
@@ -101,7 +104,6 @@ for key in tests:
     print("Starting", key)
     test_results = test()
     if test_results:
-
         print(counter, key + ": ", "Passed!")
         print(test_results)
         passed += 1

@@ -1,71 +1,58 @@
-from util import *
+import argparse
 
-class Solver:
+"""
+======================================================================
+  Complete the following function.
+======================================================================
+"""
 
-    def __init__(self):
-        pass
+def solve(num_wizards, num_constraints, wizards, constraints):
+    """
+    Write your algorithm here.
+    Input:
+        num_wizards: Number of wizards
+        num_constraints: Number of constraints
+        wizards: An array of wizard names, in no particular order
+        constraints: A 2D-array of constraints, 
+                     where constraints[0] may take the form ['A', 'B', 'C']i
 
-    def solve(self, lst, constraints):
+    Output:
+        An array of wizard names in the ordering your algorithm returns
+    """
+    return []
 
-        current_constraint = 0
-        constraints_met = 0
-        ordering = {lst[i]: i + 1 for i in range(len(lst))}
+"""
+======================================================================
+   No need to change any code below this line
+======================================================================
+"""
 
-        visited = set()
-        path = []
-        counter = 0
-        good_example = False
-        iterations = 0
-        while constraints_met <= len(constraints):
-            # print(ordering)
-            # check if a constraint is met
-            wizard1, wizard2, wizard3 = constraints[current_constraint]
-            if (ordering[wizard2] > ordering[wizard3] > ordering[wizard1]) or (
-                            ordering[wizard1] > ordering[wizard3] > ordering[wizard2]):
-                # constraint not met
-                # print("FAILED: ", wizard1, wizard2, wizard3)
-                farther_wizard = farther(ordering, wizard1, wizard2)
-                new_ordering = swap(ordering, farther_wizard, wizard3)
-                # print(visited)
-                # make sure we haven't visited this ordering before
-                if str(new_ordering) in visited:
-                    if farther_wizard == wizard1:
-                        new_ordering = swap(ordering, wizard2, wizard3)
-                        path.append((wizard2, wizard3))
-                    else:  # wizard2 is farther
-                        new_ordering = swap(ordering, wizard1, wizard3)
-                        path.append((wizard1, wizard3))
-                else:
-                    path.append((farther_wizard, wizard3))
+def read_input(filename):
+    with open(filename) as f:
+        num_wizards = int(f.readline())
+        num_constraints = int(f.readline())
+        constraints = []
+        wizards = set()
+        for _ in range(num_constraints):
+            c = f.readline().split()
+            constraints.append(c)
+            for w in c:
+                wizards.add(w)
+                
+    wizards = list(wizards)
+    return num_wizards, num_constraints, wizards, constraints
 
-                if str(new_ordering) in visited:
-                    # print("BACKTRACK")
-                    last_swap = path.pop()
-                    new_ordering = swap(ordering, last_swap[0], last_swap[1])
-                    good_example = True
-                    counter += 1
+def write_output(filename, solution):
+    with open(filename, "w") as f:
+        for wizard in solution:
+            f.write("{0} ".format(wizard))
 
-                    # try random
+if __name__=="__main__":
+    parser = argparse.ArgumentParser(description = "Constraint Solver.")
+    parser.add_argument("input_file", type=str, help = "___.in")
+    parser.add_argument("output_file", type=str, help = "___.out")
+    args = parser.parse_args()
 
-                ordering = new_ordering
-                visited.add(str(new_ordering))
-
-                # print(dict_to_list(ordering))
-            else:
-                # constraint met
-                # print(constraints_met, "Passed: ", wizard1, wizard2, wizard3)
-                constraints_met += 1
-
-            # avoid infinite loop by setting constraints_met back to 0
-            if constraints_met == len(constraints):
-                break
-
-            if current_constraint >= len(constraints) - 1:
-                current_constraint = 0
-                constraints_met = 0
-                iterations += 1
-            else:
-                current_constraint += 1
-
-        #return good_example, counter, iterations, dict_to_list(ordering)
-        return ordering
+    num_wizards, num_constraints, wizards, constraints = read_input(args.input_file)
+    solution = solve(num_wizards, num_constraints, wizards, constraints)
+    write_output(args.output_file, solution)
