@@ -1,6 +1,5 @@
 import random
 import util
-<<<<<<< HEAD
 import Solver
 
 import output_validator
@@ -17,7 +16,6 @@ def random_check(constraints, start_ordering):
             max_violations = ordering
             print("New Max: ", maximum, max_violations)
         constraints_satisfied = validate_constraints(constraints, ordering)
-=======
 import OldSolver
 def random_check(constraints, start_ordering):
     print("HAPPENING");
@@ -43,7 +41,6 @@ def random_check(constraints, start_ordering):
             print(len(violations))
             return ordering
     print('violations: ' + violations)
->>>>>>> a41effa322c0124f2fcb4f57c88649aba6bd4c82
     return ordering
 
 def validate_constraints(constraints, output_ordering):
@@ -62,9 +59,4 @@ def validate_constraints(constraints, output_ordering):
         else:
             constraints_satisfied += 1
 
-<<<<<<< HEAD
     return constraints_satisfied
-=======
-
-
->>>>>>> a41effa322c0124f2fcb4f57c88649aba6bd4c82
