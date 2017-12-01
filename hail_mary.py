@@ -76,7 +76,6 @@ def generate_var_relationship_graph(wizards, true_variables):
         graph.nodes[wiz1].add_neighbor(wiz2)
 
 
-
 # input is the SAT clauses, output is true_variables
 def solve_SAT():
     return pycosat.solve(SAT_clauses)
