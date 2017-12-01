@@ -1,5 +1,21 @@
 import random
 import util
+import Solver
+
+import output_validator
+
+def random_check(constraints, start_ordering):
+    print("STARTING")
+    ordering = start_ordering
+    maximum = float('-inf')
+    constraints_satisfied = 0
+    while constraints_satisfied != len(constraints):
+        random.shuffle(ordering)
+        if constraints_satisfied > maximum:
+            maximum = constraints_satisfied
+            max_violations = ordering
+            print("New Max: ", maximum, max_violations)
+        constraints_satisfied = validate_constraints(constraints, ordering)
 import OldSolver
 def random_check(constraints, start_ordering):
     print("HAPPENING");
@@ -27,7 +43,20 @@ def random_check(constraints, start_ordering):
     print('violations: ' + violations)
     return ordering
 
+def validate_constraints(constraints, output_ordering):
+    constraints_satisfied = 0
+    constraints_failed = []
+    for constraint in constraints:
+        c = constraint  # Creating an alias for easy reference
+        m = {k: v for v, k in enumerate(output_ordering)}  # Creating an alias for easy reference
 
+        wiz_a = m[c[0]]
+        wiz_b = m[c[1]]
+        wiz_mid = m[c[2]]
 
+        if (wiz_a < wiz_mid < wiz_b) or (wiz_b < wiz_mid < wiz_a):
+            constraints_failed.append(c)
+        else:
+            constraints_satisfied += 1
 
-
+    return constraints_satisfied
