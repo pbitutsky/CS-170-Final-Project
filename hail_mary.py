@@ -61,8 +61,6 @@ def solve(wizards, constraints):
 
     generate_variables_and_constraint_clauses(wizards, constraints)
     generate_transitivity_clauses(wizards)
-
-
     true_variables = solve_SAT(SAT_clauses)
     graph = generate_var_relationship_graph(true_variables)
     result = find_ordering(graph)
