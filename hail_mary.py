@@ -63,7 +63,7 @@ def find_ordering(wizards, variables):
             graph[wiz1].add(wiz2)
         else:
             graph[wiz2].add(wiz1)
-    toposort_flatten(graph)
+    return toposort_flatten(graph)
 
 # input is the SAT clauses, output is true_variables
 def solve_SAT():
@@ -83,10 +83,8 @@ def solve(wizards, constraints):
 
     generate_variables_and_constraint_clauses(wizards, constraints)
     generate_transitivity_clauses(wizards)
-    true_variables = solve_SAT(SAT_clauses)
-    graph = generate_var_relationship_graph(true_variables)
-    result = find_ordering(graph)
-    return result
+    pycosat_result = solve_SAT(SAT_clauses)
+    return find_ordering(wizards, pycosat_result)
 
 def read_input(filename):
     with open(filename) as f:
@@ -103,19 +101,22 @@ def read_input(filename):
     wizards = list(wizards)
     return num_wizards, num_constraints, wizards, constraints
 
-if __name__=="__main__":
-    parser = argparse.ArgumentParser(description = "Constraint Solver.")
-    parser.add_argument("input_file", type=str, help = "___.in")
-    args = parser.parse_args()
-    num_wizards, num_constraints, wizards, constraints = read_input(args.input_file)
+# if __name__=="__main__":
+#     parser = argparse.ArgumentParser(description = "Constraint Solver.")
+#     parser.add_argument("input_file", type=str, help = "___.in")
+#     args = parser.parse_args()
+#     num_wizards, num_constraints, wizards, constraints = read_input(args.input_file)
+#
+#     # TEST HERE
+#     print(wizards)
 
-    # TEST HERE
-    print(wizards)
+
+generate_variables_and_constraint_clauses(['a', 'b', 'c', 'd'], [['a', 'b', 'c'], ['a', 'c', 'd'], ['b', 'c', 'a']])
+generate_transitivity_clauses(['a', 'b', 'c', 'd'])
+print(variable_to_wizards)
+print(wizards_to_variable)
+print(SAT_clauses)
+result = solve_SAT()
+sanity_check(result)
 
 
-# generate_variables_and_constraint_clauses(['a', 'b', 'c', 'd'], [['a', 'b', 'c'], ['a', 'c', 'd'], ['b', 'c', 'a']])
-# generate_transitivity_clauses(['a', 'b', 'c', 'd'])
-# print(variable_to_wizards)
-# print(wizards_to_variable)
-# print(SAT_clauses)
-# sanity_check(solve_SAT())
