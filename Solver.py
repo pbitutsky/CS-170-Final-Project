@@ -1,4 +1,5 @@
 import argparse
+import Reducer
 
 """
 ======================================================================
@@ -19,7 +20,7 @@ def solve(num_wizards, num_constraints, wizards, constraints):
     Output:
         An array of wizard names in the ordering your algorithm returns
     """
-    return []
+    return Reducer.solve(constraints, num_wizards)
 
 """
 ======================================================================
@@ -46,6 +47,11 @@ def write_output(filename, solution):
     with open(filename, "w") as f:
         for wizard in solution:
             f.write("{0} ".format(wizard))
+
+def main(input_file, output_file):
+    num_wizards, num_constraints, wizards, constraints = read_input(input_file)
+    solution = solve(num_wizards, num_constraints, wizards, constraints)
+    write_output(output_file, solution)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description = "Constraint Solver.")

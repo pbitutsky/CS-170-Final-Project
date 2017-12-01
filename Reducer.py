@@ -52,7 +52,6 @@ class Variable:
 
 #Given a list of constraints, and set of wizards, reduce the problem to an expression in CNF
 def reduce(constraints, wizards):
-
     # variables = [i for i in range(1, len(wizards)**2+1)] #there are n^2 variables
     # english_variables = [wizards[(i-1)%n] + str(((i-1)//n)+1) for i in range(1, len(wizards)**2+1)]
     # print(variables)
@@ -173,6 +172,13 @@ def constraints_to_cnf(constraints):
 
 
 def solve(constraints, num_wizards):
+    # annoying hack but I needed this for generate_output_files.py
+    global all_wizards, all_positions, all_variables, cnf_set, cnf
+    all_wizards = set()
+    all_positions = []  # make this a set!
+    all_variables = set()
+    cnf_set = set()
+    cnf = []
     wizards = sorted(util.get_wizards_from_constraints(constraints))
     # print(wizards)
     assert len(wizards) == num_wizards
