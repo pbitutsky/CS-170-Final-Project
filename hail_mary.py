@@ -1,89 +1,160 @@
 import argparse
+import string
+
 from toposort import toposort, toposort_flatten
 import pycosat
+import random
+import itertools
 
-variable_to_wizards = {}
-wizards_to_variable = {}
-SAT_clauses = []
+def get_reverse_tuple(wiz_tuple):
+    return (wiz_tuple[1], wiz_tuple[0])
 
-def get_sorted_wizard_tuple(wiz_tuple):
-    if wiz_tuple[0] > wiz_tuple[1]:
-        return (wiz_tuple[1], wiz_tuple[0])
-    return (wiz_tuple[0], wiz_tuple[1])
+class HailMary:
 
+    def __init__(self):
+        self.variable_to_wizards = {}
+        self.wizards_to_variable = {}
+        self.SAT_clauses = []
 
-# PAUL
-def generate_variables_and_constraint_clauses(wizards, constraints):
-    counter = 1
-    for constraint in constraints:
-        w1, w2, w3 = constraint
+    def prune_constraints(self, constraints):
+        pruned = []
+        for c in constraints:
+            found = False
+            for p in pruned:
+                if c[2] == p[2] and ((c[0] == p[0] and c[1] == p[1]) or (c[0] == p[1] and c[1] == p[0])):
+                    found = True
+                    break
+            if not found:
+                pruned.append(c)
+        return pruned
 
-        wizard_tuple1 = (w1, w3)
-        wizard_tuple2 = (w2, w3)
-
-        #generate the variables
-        for wiz_tuple in [wizard_tuple1, wizard_tuple2]:
-
-            #create a sorted wiz tuple
-            sorted_wiz_tuple = get_sorted_wizard_tuple(wiz_tuple)
-            if sorted_wiz_tuple not in wizards_to_variable:
-                if counter not in variable_to_wizards:
-                    wizards_to_variable[sorted_wiz_tuple] = counter
-                    variable_to_wizards[counter] = sorted_wiz_tuple
+    def generate_variables(self, wizards):
+        counter = 1
+        for a in wizards:
+            for b in wizards:
+                if a != b:
+                    tup = (a, b)
+                    if tup not in self.wizards_to_variable:
+                        if counter not in self.variable_to_wizards:
+                            self.wizards_to_variable[tup] = counter
+                            self.variable_to_wizards[counter] = tup
+                        else:
+                            raise Exception("THIS REALLY SHOULD NOT HAPPEN")
                     counter += 1
+
+    def generate_type3_clauses(self):
+        for tup in self.wizards_to_variable:
+
+            reversed_tup = get_reverse_tuple(tup)
+            if reversed_tup not in self.wizards_to_variable:
+                raise Exception("VARIABLES NOT CORRECTLY INPUT")
+            A = self.wizards_to_variable[tup]
+            B = self.wizards_to_variable[reversed_tup]
+            self.SAT_clauses.append([-A, -B])
+            self.SAT_clauses.append([A, B])
+
+    # PAUL
+    def generate_constraint_clauses(self, wizards, constraints):
+        counter = 1
+        helper = lambda wizard_tuple: wizard_tuple[0] + " < " + wizard_tuple[1]
+        for constraint in constraints:
+            w1, w2, w3 = constraint
+
+            wizard_tuple1 = (w1, w3)
+            wizard_tuple2 = (w2, w3)
+            # print(constraint)
+            # print(wizard_tuple1, wizard_tuple2, get_reverse_tuple(wizard_tuple1), get_reverse_tuple(wizard_tuple2))
+
+            #generate the variables
+            for wiz_tuple in [wizard_tuple1, wizard_tuple2,
+                              get_reverse_tuple(wizard_tuple1), get_reverse_tuple(wizard_tuple2)]:
+
+                #create a sorted wiz tuple
+                reverse_wiz_tuple = get_reverse_tuple(wiz_tuple)
+                if wiz_tuple not in self.wizards_to_variable:
+                    raise Exception("BUT I ADDED EVERYTHING")
+                    # if counter not in self.variable_to_wizards:
+                    #     self.wizards_to_variable[wiz_tuple] = counter
+                    #     self.variable_to_wizards[counter] = wiz_tuple
+                    #
+                    #     if reverse_wiz_tuple in self.wizards_to_variable:
+                    #         a = counter
+                    #         b = self.wizards_to_variable[reverse_wiz_tuple]
+                    #         self.SAT_clauses.append([-a, -b])
+                    #         self.SAT_clauses.append([a, b])
+                    #
+                    #     counter += 1
+                    #     self.wizards_to_variable[reverse_wiz_tuple] = counter
+                    #     self.variable_to_wizards[counter] = reverse_wiz_tuple
+                    #
+                    #     counter += 1
+                    # else:
+                    #     print(str(wiz_tuple) + " is not in map but " + str(counter) + " is, with value " + str(self.variable_to_wizards[counter]))
+                    #     raise Exception("This shouldn't happen")
+            # print(wizard_tuple1, wizard_tuple2)
+            #3, 2
+            a = self.wizards_to_variable[wizard_tuple1]
+            b = self.wizards_to_variable[wizard_tuple2]
+            c = self.wizards_to_variable[get_reverse_tuple(wizard_tuple1)]
+            d = self.wizards_to_variable[get_reverse_tuple(wizard_tuple2)]
+
+            # print(helper(self.variable_to_wizards[a]), helper(self.variable_to_wizards[b]), helper(self.variable_to_wizards[c]), helper(self.variable_to_wizards[d]))
+            # print(a, b, c, d)
+            # print(wiz_tuple)
+            # clauses = [[-a, b], [a, -b]]
+
+            clauses = [[a, c], [a, d], [b, c], [b, d]]
+            # clauses = [[-a, b], [-c, d]]
+            self.SAT_clauses.extend(clauses)
+
+    # KATYA
+    def generate_transitivity_clauses(self, wizards):
+        for a in wizards:
+            for b in wizards:
+                for c in wizards:
+                    if a != b and b != c and a != c: #(a < b and b < c and a < c):
+                        var1 = self.wizards_to_variable[(a, b)]
+                        var2 = self.wizards_to_variable[(b, c)]
+                        var3 = self.wizards_to_variable[(a, c)]
+                        self.SAT_clauses.append([-var1, -var2, var3])
+
+    def find_ordering(self, wizards, SAT_result):
+        graph = {}
+        for w in wizards:
+            graph[w] = set()
+        for var in SAT_result:
+            wiz1, wiz2 = self.variable_to_wizards[abs(var)]
+            if var > 0:
+                graph[wiz1].add(wiz2)
+        return toposort_flatten(graph)
+
+    # input is the SAT clauses, output is true_variables
+    def solve_SAT(self):
+        return pycosat.solve(self.SAT_clauses)
+
+    def sanity_check(self, SAT_result):
+        temp_map = {}
+        for var in SAT_result:
+            wiz_tuple = self.variable_to_wizards[abs(var)]
+            if var > 0:
+                print("Wizard " + wiz_tuple[0] + " should be before " + wiz_tuple[1])
+                if wiz_tuple[0] not in temp_map:
+                    temp_map[wiz_tuple[0]] = []
                 else:
-                    raise Exception("This shouldn't happen")
+                    temp_map[wiz_tuple[0]] += [wiz_tuple[1]]
+        print(temp_map)
 
-        a = wizards_to_variable[get_sorted_wizard_tuple(wizard_tuple1)]
-        b = wizards_to_variable[get_sorted_wizard_tuple(wizard_tuple2)]
-
-        clauses = [[-a, b], [a, -b]]
-        SAT_clauses.extend(clauses)
-
-# KATYA
-def generate_transitivity_clauses(wizards):
-    for a in wizards:
-        for b in wizards:
-            for c in wizards:
-                if (a, b) in wizards_to_variable and (b, c) in wizards_to_variable and (a, c) in wizards_to_variable:
-                    var1 = wizards_to_variable[(a, b)]
-                    var2 = wizards_to_variable[(b, c)]
-                    var3 = wizards_to_variable[(a, c)]
-                    SAT_clauses.append([-var1, -var2, var3])
-                    SAT_clauses.append([var1, var2, -var3])
-
-def find_ordering(wizards, SAT_result):
-    graph = {}
-    for w in wizards:
-        graph[w] = set()
-    for var in SAT_result:
-        wiz1, wiz2 = variable_to_wizards[abs(var)]
-        if var > 0:
-            graph[wiz1].add(wiz2)
-        else:
-            graph[wiz2].add(wiz1)
-    return toposort_flatten(graph)
-
-# input is the SAT clauses, output is true_variables
-def solve_SAT():
-    return pycosat.solve(SAT_clauses)
-
-def sanity_check(SAT_result):
-    for var in SAT_result:
-        wiz_tuple = variable_to_wizards[abs(var)]
-        if var > 0:
-            print("Wizard " + wiz_tuple[0] + " should be before " + wiz_tuple[1])
-        else:
-            print("Wizard " + wiz_tuple[1] + " should be before " + wiz_tuple[0])
-
-
-
-def solve(wizards, constraints):
-
-    generate_variables_and_constraint_clauses(wizards, constraints)
-    generate_transitivity_clauses(wizards)
-    pycosat_result = solve_SAT()
-    return find_ordering(wizards, pycosat_result)
+    def solve(self, wizards, constraints):
+        wizards = sorted(wizards)
+        constraints = self.prune_constraints(constraints)
+        self.generate_variables(wizards)
+        self.generate_transitivity_clauses(wizards)
+        self.generate_constraint_clauses(wizards, constraints)
+        self.generate_additional_clauses()
+        pycosat_result = self.solve_SAT()
+        if type(pycosat_result) != list:
+            raise Exception(pycosat_result) #e.g. UNSAT
+        return self.find_ordering(wizards, pycosat_result)
 
 def read_input(filename):
     with open(filename) as f:
@@ -96,27 +167,6 @@ def read_input(filename):
             constraints.append(c)
             for w in c:
                 wizards.add(w)
-                
+
     wizards = list(wizards)
     return num_wizards, num_constraints, wizards, constraints
-
-if __name__=="__main__":
-    parser = argparse.ArgumentParser(description = "Constraint Solver.")
-    parser.add_argument("input_file", type=str, help = "___.in")
-    args = parser.parse_args()
-    num_wizards, num_constraints, wizards, constraints = read_input(args.input_file)
-    solution = solve(wizards, constraints)
-    print(solution)
-
-# wizards = ['a', 'b', 'c', 'd']
-# generate_variables_and_constraint_clauses(wizards, [['a', 'b', 'c'], ['a', 'c', 'd'], ['b', 'c', 'a']])
-# generate_transitivity_clauses(['a', 'b', 'c', 'd'])
-# print(variable_to_wizards)
-# print(wizards_to_variable)
-# print(SAT_clauses)
-# result = solve_SAT()
-# sanity_check(result)
-# print(find_ordering(wizards, result))
-
-
-

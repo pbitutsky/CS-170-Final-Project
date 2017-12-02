@@ -1,6 +1,6 @@
 import argparse
 import Reducer
-import hail_mary
+from hail_mary import HailMary
 
 """
 ======================================================================
@@ -22,7 +22,8 @@ def solve(num_wizards, num_constraints, wizards, constraints):
         An array of wizard names in the ordering your algorithm returns
     """
     # return Reducer.solve(constraints, num_wizards)
-    return hail_mary.solve(wizards, constraints)
+    hm = HailMary()
+    return hm.solve(wizards, constraints)
 
 """
 ======================================================================
