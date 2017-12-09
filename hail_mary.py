@@ -42,7 +42,7 @@ class HailMary:
                             raise Exception("THIS REALLY SHOULD NOT HAPPEN")
                     counter += 1
 
-    def generate_type3_clauses(self):
+    def generate_additional_clauses(self):
         for tup in self.wizards_to_variable:
 
             reversed_tup = get_reverse_tuple(tup)
@@ -71,40 +71,15 @@ class HailMary:
 
                 #create a sorted wiz tuple
                 reverse_wiz_tuple = get_reverse_tuple(wiz_tuple)
-                if wiz_tuple not in self.wizards_to_variable:
-                    raise Exception("BUT I ADDED EVERYTHING")
-                    # if counter not in self.variable_to_wizards:
-                    #     self.wizards_to_variable[wiz_tuple] = counter
-                    #     self.variable_to_wizards[counter] = wiz_tuple
-                    #
-                    #     if reverse_wiz_tuple in self.wizards_to_variable:
-                    #         a = counter
-                    #         b = self.wizards_to_variable[reverse_wiz_tuple]
-                    #         self.SAT_clauses.append([-a, -b])
-                    #         self.SAT_clauses.append([a, b])
-                    #
-                    #     counter += 1
-                    #     self.wizards_to_variable[reverse_wiz_tuple] = counter
-                    #     self.variable_to_wizards[counter] = reverse_wiz_tuple
-                    #
-                    #     counter += 1
-                    # else:
-                    #     print(str(wiz_tuple) + " is not in map but " + str(counter) + " is, with value " + str(self.variable_to_wizards[counter]))
-                    #     raise Exception("This shouldn't happen")
-            # print(wizard_tuple1, wizard_tuple2)
-            #3, 2
+                # if wiz_tuple not in self.wizards_to_variable:
+                    # raise Exception("BUT I ADDED EVERYTHING")
+
             a = self.wizards_to_variable[wizard_tuple1]
             b = self.wizards_to_variable[wizard_tuple2]
             c = self.wizards_to_variable[get_reverse_tuple(wizard_tuple1)]
             d = self.wizards_to_variable[get_reverse_tuple(wizard_tuple2)]
 
-            # print(helper(self.variable_to_wizards[a]), helper(self.variable_to_wizards[b]), helper(self.variable_to_wizards[c]), helper(self.variable_to_wizards[d]))
-            # print(a, b, c, d)
-            # print(wiz_tuple)
-            # clauses = [[-a, b], [a, -b]]
-
             clauses = [[a, c], [a, d], [b, c], [b, d]]
-            # clauses = [[-a, b], [-c, d]]
             self.SAT_clauses.extend(clauses)
 
     # KATYA

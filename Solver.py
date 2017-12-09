@@ -22,6 +22,9 @@ def solve(num_wizards, num_constraints, wizards, constraints):
         An array of wizard names in the ordering your algorithm returns
     """
     # return Reducer.solve(constraints, num_wizards)
+    print(wizards)
+    print(num_wizards)
+    print(len(wizards))
     hm = HailMary()
     return hm.solve(wizards, constraints)
 

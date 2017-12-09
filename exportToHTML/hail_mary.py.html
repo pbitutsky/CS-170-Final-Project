@@ -1,0 +1,169 @@
+<html>
+<head>
+<title>hail_mary.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #606366; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(204,120,50); }
+.s1 { color: rgb(169,183,198); }
+.s2 { color: rgb(104,151,187); }
+.s3 { color: rgb(165,194,97); }
+.s4 { color: rgb(128,128,128); }
+</style>
+</head>
+<BODY BGCOLOR="#2b2b2b">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+hail_mary.py</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">import </span><span class="s1">argparse 
+</span><span class="s0">import </span><span class="s1">string 
+ 
+</span><span class="s0">from </span><span class="s1">toposort </span><span class="s0">import </span><span class="s1">toposort</span><span class="s0">, </span><span class="s1">toposort_flatten 
+</span><span class="s0">import </span><span class="s1">pycosat 
+</span><span class="s0">import </span><span class="s1">random 
+</span><span class="s0">import </span><span class="s1">itertools 
+ 
+</span><span class="s0">def </span><span class="s1">get_reverse_tuple(wiz_tuple): 
+    </span><span class="s0">return </span><span class="s1">(wiz_tuple[</span><span class="s2">1</span><span class="s1">]</span><span class="s0">, </span><span class="s1">wiz_tuple[</span><span class="s2">0</span><span class="s1">]) 
+ 
+</span><span class="s0">class </span><span class="s1">HailMary: 
+ 
+    </span><span class="s0">def </span><span class="s1">__init__(self): 
+        self.variable_to_wizards = {} 
+        self.wizards_to_variable = {} 
+        self.SAT_clauses = [] 
+ 
+    </span><span class="s0">def </span><span class="s1">prune_constraints(self</span><span class="s0">, </span><span class="s1">constraints): 
+        pruned = [] 
+        </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">constraints: 
+            found = False 
+            </span><span class="s0">for </span><span class="s1">p </span><span class="s0">in </span><span class="s1">pruned: 
+                </span><span class="s0">if </span><span class="s1">c[</span><span class="s2">2</span><span class="s1">] == p[</span><span class="s2">2</span><span class="s1">] </span><span class="s0">and </span><span class="s1">((c[</span><span class="s2">0</span><span class="s1">] == p[</span><span class="s2">0</span><span class="s1">] </span><span class="s0">and </span><span class="s1">c[</span><span class="s2">1</span><span class="s1">] == p[</span><span class="s2">1</span><span class="s1">]) </span><span class="s0">or </span><span class="s1">(c[</span><span class="s2">0</span><span class="s1">] == p[</span><span class="s2">1</span><span class="s1">] </span><span class="s0">and </span><span class="s1">c[</span><span class="s2">1</span><span class="s1">] == p[</span><span class="s2">0</span><span class="s1">])): 
+                    found = True 
+                    </span><span class="s0">break</span><span class="s1"> 
+            </span><span class="s0">if not </span><span class="s1">found: 
+                pruned.append(c) 
+        </span><span class="s0">return </span><span class="s1">pruned 
+ 
+    </span><span class="s0">def </span><span class="s1">generate_variables(self</span><span class="s0">, </span><span class="s1">wizards): 
+        counter = </span><span class="s2">1</span><span class="s1"> 
+        </span><span class="s0">for </span><span class="s1">a </span><span class="s0">in </span><span class="s1">wizards: 
+            </span><span class="s0">for </span><span class="s1">b </span><span class="s0">in </span><span class="s1">wizards: 
+                </span><span class="s0">if </span><span class="s1">a != b: 
+                    tup = (a</span><span class="s0">, </span><span class="s1">b) 
+                    </span><span class="s0">if </span><span class="s1">tup </span><span class="s0">not in </span><span class="s1">self.wizards_to_variable: 
+                        </span><span class="s0">if </span><span class="s1">counter </span><span class="s0">not in </span><span class="s1">self.variable_to_wizards: 
+                            self.wizards_to_variable[tup] = counter 
+                            self.variable_to_wizards[counter] = tup 
+                        </span><span class="s0">else</span><span class="s1">: 
+                            </span><span class="s0">raise </span><span class="s1">Exception(</span><span class="s3">&quot;THIS REALLY SHOULD NOT HAPPEN&quot;</span><span class="s1">) 
+                    counter += </span><span class="s2">1</span><span class="s1"> 
+ 
+    </span><span class="s0">def </span><span class="s1">generate_additional_clauses(self): 
+        </span><span class="s0">for </span><span class="s1">tup </span><span class="s0">in </span><span class="s1">self.wizards_to_variable: 
+ 
+            reversed_tup = get_reverse_tuple(tup) 
+            </span><span class="s0">if </span><span class="s1">reversed_tup </span><span class="s0">not in </span><span class="s1">self.wizards_to_variable: 
+                </span><span class="s0">raise </span><span class="s1">Exception(</span><span class="s3">&quot;VARIABLES NOT CORRECTLY INPUT&quot;</span><span class="s1">) 
+            A = self.wizards_to_variable[tup] 
+            B = self.wizards_to_variable[reversed_tup] 
+            self.SAT_clauses.append([-A</span><span class="s0">, </span><span class="s1">-B]) 
+            self.SAT_clauses.append([A</span><span class="s0">, </span><span class="s1">B]) 
+ 
+    </span><span class="s4"># PAUL</span><span class="s1"> 
+    </span><span class="s0">def </span><span class="s1">generate_constraint_clauses(self</span><span class="s0">, </span><span class="s1">wizards</span><span class="s0">, </span><span class="s1">constraints): 
+        counter = </span><span class="s2">1</span><span class="s1"> 
+        helper = </span><span class="s0">lambda </span><span class="s1">wizard_tuple: wizard_tuple[</span><span class="s2">0</span><span class="s1">] + </span><span class="s3">&quot; &lt; &quot; </span><span class="s1">+ wizard_tuple[</span><span class="s2">1</span><span class="s1">] 
+        </span><span class="s0">for </span><span class="s1">constraint </span><span class="s0">in </span><span class="s1">constraints: 
+            w1</span><span class="s0">, </span><span class="s1">w2</span><span class="s0">, </span><span class="s1">w3 = constraint 
+ 
+            wizard_tuple1 = (w1</span><span class="s0">, </span><span class="s1">w3) 
+            wizard_tuple2 = (w2</span><span class="s0">, </span><span class="s1">w3) 
+            </span><span class="s4"># print(constraint)</span><span class="s1"> 
+            </span><span class="s4"># print(wizard_tuple1, wizard_tuple2, get_reverse_tuple(wizard_tuple1), get_reverse_tuple(wizard_tuple2))</span><span class="s1"> 
+ 
+            </span><span class="s4">#generate the variables</span><span class="s1"> 
+            </span><span class="s0">for </span><span class="s1">wiz_tuple </span><span class="s0">in </span><span class="s1">[wizard_tuple1</span><span class="s0">, </span><span class="s1">wizard_tuple2</span><span class="s0">,</span><span class="s1"> 
+                              get_reverse_tuple(wizard_tuple1)</span><span class="s0">, </span><span class="s1">get_reverse_tuple(wizard_tuple2)]: 
+ 
+                </span><span class="s4">#create a sorted wiz tuple</span><span class="s1"> 
+                reverse_wiz_tuple = get_reverse_tuple(wiz_tuple) 
+                </span><span class="s0">if </span><span class="s1">wiz_tuple </span><span class="s0">not in </span><span class="s1">self.wizards_to_variable: 
+                    </span><span class="s0">raise </span><span class="s1">Exception(</span><span class="s3">&quot;BUT I ADDED EVERYTHING&quot;</span><span class="s1">) 
+ 
+            a = self.wizards_to_variable[wizard_tuple1] 
+            b = self.wizards_to_variable[wizard_tuple2] 
+            c = self.wizards_to_variable[get_reverse_tuple(wizard_tuple1)] 
+            d = self.wizards_to_variable[get_reverse_tuple(wizard_tuple2)] 
+ 
+            clauses = [[a</span><span class="s0">, </span><span class="s1">c]</span><span class="s0">, </span><span class="s1">[a</span><span class="s0">, </span><span class="s1">d]</span><span class="s0">, </span><span class="s1">[b</span><span class="s0">, </span><span class="s1">c]</span><span class="s0">, </span><span class="s1">[b</span><span class="s0">, </span><span class="s1">d]] 
+            self.SAT_clauses.extend(clauses) 
+ 
+    </span><span class="s4"># KATYA</span><span class="s1"> 
+    </span><span class="s0">def </span><span class="s1">generate_transitivity_clauses(self</span><span class="s0">, </span><span class="s1">wizards): 
+        </span><span class="s0">for </span><span class="s1">a </span><span class="s0">in </span><span class="s1">wizards: 
+            </span><span class="s0">for </span><span class="s1">b </span><span class="s0">in </span><span class="s1">wizards: 
+                </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">wizards: 
+                    </span><span class="s0">if </span><span class="s1">a != b </span><span class="s0">and </span><span class="s1">b != c </span><span class="s0">and </span><span class="s1">a != c: </span><span class="s4">#(a &lt; b and b &lt; c and a &lt; c):</span><span class="s1"> 
+                        var1 = self.wizards_to_variable[(a</span><span class="s0">, </span><span class="s1">b)] 
+                        var2 = self.wizards_to_variable[(b</span><span class="s0">, </span><span class="s1">c)] 
+                        var3 = self.wizards_to_variable[(a</span><span class="s0">, </span><span class="s1">c)] 
+                        self.SAT_clauses.append([-var1</span><span class="s0">, </span><span class="s1">-var2</span><span class="s0">, </span><span class="s1">var3]) 
+ 
+    </span><span class="s0">def </span><span class="s1">find_ordering(self</span><span class="s0">, </span><span class="s1">wizards</span><span class="s0">, </span><span class="s1">SAT_result): 
+        graph = {} 
+        </span><span class="s0">for </span><span class="s1">w </span><span class="s0">in </span><span class="s1">wizards: 
+            graph[w] = set() 
+        </span><span class="s0">for </span><span class="s1">var </span><span class="s0">in </span><span class="s1">SAT_result: 
+            wiz1</span><span class="s0">, </span><span class="s1">wiz2 = self.variable_to_wizards[abs(var)] 
+            </span><span class="s0">if </span><span class="s1">var &gt; </span><span class="s2">0</span><span class="s1">: 
+                graph[wiz1].add(wiz2) 
+        </span><span class="s0">return </span><span class="s1">toposort_flatten(graph) 
+ 
+    </span><span class="s4"># input is the SAT clauses, output is true_variables</span><span class="s1"> 
+    </span><span class="s0">def </span><span class="s1">solve_SAT(self): 
+        </span><span class="s0">return </span><span class="s1">pycosat.solve(self.SAT_clauses) 
+ 
+    </span><span class="s0">def </span><span class="s1">sanity_check(self</span><span class="s0">, </span><span class="s1">SAT_result): 
+        temp_map = {} 
+        </span><span class="s0">for </span><span class="s1">var </span><span class="s0">in </span><span class="s1">SAT_result: 
+            wiz_tuple = self.variable_to_wizards[abs(var)] 
+            </span><span class="s0">if </span><span class="s1">var &gt; </span><span class="s2">0</span><span class="s1">: 
+                </span><span class="s0">print</span><span class="s1">(</span><span class="s3">&quot;Wizard &quot; </span><span class="s1">+ wiz_tuple[</span><span class="s2">0</span><span class="s1">] + </span><span class="s3">&quot; should be before &quot; </span><span class="s1">+ wiz_tuple[</span><span class="s2">1</span><span class="s1">]) 
+                </span><span class="s0">if </span><span class="s1">wiz_tuple[</span><span class="s2">0</span><span class="s1">] </span><span class="s0">not in </span><span class="s1">temp_map: 
+                    temp_map[wiz_tuple[</span><span class="s2">0</span><span class="s1">]] = [] 
+                </span><span class="s0">else</span><span class="s1">: 
+                    temp_map[wiz_tuple[</span><span class="s2">0</span><span class="s1">]] += [wiz_tuple[</span><span class="s2">1</span><span class="s1">]] 
+        </span><span class="s0">print</span><span class="s1">(temp_map) 
+ 
+    </span><span class="s0">def </span><span class="s1">solve(self</span><span class="s0">, </span><span class="s1">wizards</span><span class="s0">, </span><span class="s1">constraints): 
+        wizards = sorted(wizards) 
+        constraints = self.prune_constraints(constraints) 
+        self.generate_variables(wizards) 
+        self.generate_transitivity_clauses(wizards) 
+        self.generate_constraint_clauses(wizards</span><span class="s0">, </span><span class="s1">constraints) 
+        self.generate_additional_clauses() 
+        pycosat_result = self.solve_SAT() 
+        </span><span class="s0">if </span><span class="s1">type(pycosat_result) != list: 
+            </span><span class="s0">raise </span><span class="s1">Exception(pycosat_result) </span><span class="s4">#e.g. UNSAT</span><span class="s1"> 
+        </span><span class="s0">return </span><span class="s1">self.find_ordering(wizards</span><span class="s0">, </span><span class="s1">pycosat_result) 
+ 
+</span><span class="s0">def </span><span class="s1">read_input(filename): 
+    </span><span class="s0">with </span><span class="s1">open(filename) </span><span class="s0">as </span><span class="s1">f: 
+        num_wizards = int(f.readline()) 
+        num_constraints = int(f.readline()) 
+        constraints = [] 
+        wizards = set() 
+        </span><span class="s0">for </span><span class="s1">_ </span><span class="s0">in </span><span class="s1">range(num_constraints): 
+            c = f.readline().split() 
+            constraints.append(c) 
+            </span><span class="s0">for </span><span class="s1">w </span><span class="s0">in </span><span class="s1">c: 
+                wizards.add(w) 
+ 
+    wizards = list(wizards) 
+    </span><span class="s0">return </span><span class="s1">num_wizards</span><span class="s0">, </span><span class="s1">num_constraints</span><span class="s0">, </span><span class="s1">wizards</span><span class="s0">, </span><span class="s1">constraints</span></pre>
+</body>
+</html>

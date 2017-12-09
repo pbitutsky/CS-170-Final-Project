@@ -29,4 +29,34 @@ def staff_inputs():
         except:
         	print("error")
 
-staff_inputs()
+# staff_inputs()
+
+def phase3():
+    inputs = [f for f in listdir('assigned_input_submissions') if isfile(join('assigned_input_submissions', f))]
+    print(len(inputs))
+    # for input in inputs:
+    #     file_without_extension = input[:-3]
+    #     print(file_without_extension)
+    #     infile = 'assigned_input_submissions/{0}.in'.format(file_without_extension)
+    #     outfile = 'outputs/{0}.out'.format(file_without_extension)
+    #     try:
+    #         Solver.main(infile, outfile)
+    #         output_validator.main([infile, outfile])
+    #         print(str(input) + "success")
+    #     except:
+    #         print("error")
+
+
+
+def phase3_problematic():
+    problematic = ['submission_4714364_input35', 'submission_4714433_input50', 'submission_4620699_input20', 'submission_4714128_inputs_input20']
+    for input in problematic:
+        infile = 'assigned_input_submissions/{0}.in'.format(input)
+        outfile = 'assigned_input_submissions/{0}.out'.format(input)
+
+        Solver.main(infile, outfile)
+        output_validator.main([infile, outfile])
+        print(str(input) + "success")
+
+# phase3_problematic()
+phase3()
